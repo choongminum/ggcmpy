@@ -93,7 +93,7 @@ class FieldInterpolatorYee_python:
     """
 
     def __init__(self, ds: xr.Dataset) -> None:
-        assert {"bx1", "by1", "bz1", "ex1", "ey1", "ez1"} <= ds.data_vars.keys()
+        assert {"bx1", "by1", "bz1", "eflx", "efly", "eflz"} <= ds.data_vars.keys()
         self._ds = ds
 
     def B(self, point: np.ndarray) -> np.ndarray:
@@ -103,7 +103,10 @@ class FieldInterpolatorYee_python:
 
     def E(self, point: np.ndarray) -> np.ndarray:
         return np.array(
-            [self._interpolate(self._ds[fld], point) for fld in ["ex1", "ey1", "ez1"]]
+            [
+                self._interpolate(self._ds[fld], point)
+                for fld in ["eflx", "efly", "eflz"]
+            ]
         )
 
     def _interpolate(self, da: xr.DataArray, point: np.ndarray) -> float:
@@ -167,9 +170,9 @@ class FieldInterpolatorYee_f2py:
             ds.bx1,
             ds.by1,
             ds.bz1,
-            ds.ex1,
-            ds.ey1,
-            ds.ez1,
+            ds.eflx,
+            ds.efly,
+            ds.eflz,
             ds.x,
             ds.y,
             ds.z,
@@ -273,7 +276,7 @@ class BorisIntegrator_python:
         self.m = m
         self._interpolator: FieldInterpolator_python | FieldInterpolatorYee_python
         if isinstance(ds, xr.Dataset):
-            if {"bx1", "by1", "bz1", "ex1", "ey1", "ez1"} <= ds.data_vars.keys():
+            if {"bx1", "by1", "bz1", "eflx", "efly", "eflz"} <= ds.data_vars.keys():
                 self._interpolator = FieldInterpolatorYee_python(ds)
             else:
                 self._interpolator = FieldInterpolator_python(ds)
