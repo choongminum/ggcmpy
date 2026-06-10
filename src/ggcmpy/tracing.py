@@ -33,6 +33,7 @@ def make_vector_field(
                 for k in range(fld.shape[2]):
                     val = vector_field(np.array([crds[0][i], crds[1][j], crds[2][k]]))
                     fld[i, j, k] = val[d]
+        # fld = xr.apply_ufunc(lambda x, y, z: vector_field(np.array([x, y, z]))[d], *crds, vectorize=True)
         flds[fld_name] = (dims, fld)
 
     return flds
