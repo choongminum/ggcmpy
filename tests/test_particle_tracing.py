@@ -18,9 +18,9 @@ b1_grid = [
     ("bz1", ("x", "y", "z_nc")),
 ]
 e1_grid = [
-    ("ex1", ("x", "y_nc", "z_nc")),
-    ("ey1", ("x_nc", "y", "z_nc")),
-    ("ez1", ("x_nc", "y_nc", "z")),
+    ("eflx", ("x", "y_nc", "z_nc")),
+    ("efly", ("x_nc", "y", "z_nc")),
+    ("eflz", ("x_nc", "y_nc", "z")),
 ]
 
 
