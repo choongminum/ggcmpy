@@ -8,8 +8,92 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from ggcmpy import constants
+from ggcmpy import (  # type: ignore[attr-defined]
+    _jrrle,
+    constants,
+)
 from ggcmpy.tracing import emfields, integrator
+
+
+class FieldInterpolator_f2py:
+    """
+    FieldInterpolator_f2py provides an interface to interpolate electromagnetic field values
+    from a given xarray.Dataset using a Fortran backend via f2py.
+
+    Methods:
+        __init__(ds: xr.Dataset)
+            Initializes the interpolator by loading field data (bx, by, bz, ex, ey, ez, x, y, z)
+            from the provided xarray.Dataset into the Fortran backend.
+        B(point: np.ndarray) -> np.ndarray
+            Interpolates and returns the magnetic field vector (B) at the specified spatial point.
+        E(point: np.ndarray) -> np.ndarray
+            Interpolates and returns the electric field vector (E) at the specified spatial point.
+
+    Args:
+        ds (xr.Dataset): An xarray dataset containing the required field components.
+    """
+
+    def __init__(self, ds: xr.Dataset) -> None:
+        _jrrle.particle_tracing_f2py.load(
+            ds.bx, ds.by, ds.bz, ds.ex, ds.ey, ds.ez, ds.x, ds.y, ds.z
+        )
+
+    def B(self, point: np.ndarray) -> np.ndarray:
+        return np.array(
+            [_jrrle.particle_tracing_f2py.interpolate(*point, d) for d in range(3)]
+        )
+
+    def E(self, point: np.ndarray) -> np.ndarray:
+        return np.array(
+            [_jrrle.particle_tracing_f2py.interpolate(*point, d + 3) for d in range(3)]
+        )
+
+
+class FieldInterpolatorYee_f2py:
+    """
+    FieldInterpolatorYee_f2py provides an interface for interpolating electromagnetic field components
+    (B and E fields) at arbitrary points using Yee grid data loaded from an xarray.Dataset.
+
+    Methods:
+        __init__(ds: xr.Dataset)
+            Initializes the interpolator by loading Yee grid field data from the provided xarray.Dataset.
+        B(point: np.ndarray) -> np.ndarray
+            Interpolates and returns the magnetic field vector (B) at the specified spatial point.
+        E(point: np.ndarray) -> np.ndarray
+            Interpolates and returns the electric field vector (E) at the specified spatial point.
+
+    Args:
+        ds (xr.Dataset): An xarray dataset containing the required Yee grid field components.
+    """
+
+    def __init__(self, ds: xr.Dataset) -> None:
+        _jrrle.particle_tracing_f2py.load_yee(
+            ds.bx1,
+            ds.by1,
+            ds.bz1,
+            ds.eflx,
+            ds.efly,
+            ds.eflz,
+            ds.x,
+            ds.y,
+            ds.z,
+            ds.x_nc,
+            ds.y_nc,
+            ds.z_nc,
+        )
+
+    def B(self, point: np.ndarray) -> np.ndarray:
+        return np.array(
+            [_jrrle.particle_tracing_f2py.interpolate_yee(*point, d) for d in range(3)]
+        )
+
+    def E(self, point: np.ndarray) -> np.ndarray:
+        return np.array(
+            [
+                _jrrle.particle_tracing_f2py.interpolate_yee(*point, d + 3)
+                for d in range(3)
+            ]
+        )
 
 
 class BorisIntegratorBase:
