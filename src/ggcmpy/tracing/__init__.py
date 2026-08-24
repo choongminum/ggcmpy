@@ -16,7 +16,7 @@ from scipy import constants  # type: ignore[import-untyped]
 
 from ggcmpy import _jrrle  # type: ignore[attr-defined]
 
-from . import boris_push, emfields
+from . import emfields, integrator
 
 # pylint: disable=C0103,I1101
 
@@ -162,32 +162,26 @@ class BorisIntegratorBase:
         fields: emfields.emfields,
         q=constants.e,
         m=constants.m_e,
-        boris_push_cls=None,
+        integrator_boris_cls=None,
     ):
         self._fields = fields
         self._q = q
         self._m = m
-        self._boris_push_cls = boris_push_cls
+        self._integrator_boris_cls = integrator_boris_cls
 
     def integrate(self, x0, u0, t_final, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
-        boris_push = self._boris_push_cls(self._fields, self._q, self._m)
+        integrator_boris: integrator.boris_base = self._integrator_boris_cls(
+            self._fields, self._q, self._m
+        )
 
         prts_df = pd.DataFrame(
             np.array([[0.0, *x0, *u0]]),
             columns=["time", "x", "y", "z", "ux", "uy", "uz"],
         )
-        snapshots = [prts_df.copy()]
 
-        while prts_df.loc[0, "time"] < t_final:
-            prts_df = boris_push.push(
-                prts_df,
-                max_steps=1,
-                dt_max=dt_max,
-                dt_max_gyro=dt_max_gyro,
-            )
-            snapshots.append(prts_df.copy())
-
-        return pd.concat(snapshots, ignore_index=True)
+        return integrator_boris.integrate(
+            prts_df, t_final=t_final, dt_max=dt_max, dt_max_gyro=dt_max_gyro
+        )
 
 
 class BorisIntegrator_python(BorisIntegratorBase):
@@ -221,7 +215,7 @@ class BorisIntegrator_python(BorisIntegratorBase):
         else:
             fields = ds  # assume it's already an emfields.emfields
 
-        super().__init__(fields, q, m, boris_push_cls=boris_push.boris_push_python)
+        super().__init__(fields, q, m, integrator_boris_cls=integrator.boris_python)
 
 
 class BorisIntegrator_f2py(BorisIntegratorBase):
@@ -298,7 +292,7 @@ class BorisIntegrator_cxx(BorisIntegratorBase):
             )
             fields = df
 
-        super().__init__(fields, q, m, boris_push_cls=boris_push.boris_push_cxx)
+        super().__init__(fields, q, m, integrator_boris_cls=integrator.boris_cxx)
 
 
 BorisIntegrator = BorisIntegrator_python
