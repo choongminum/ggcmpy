@@ -73,7 +73,8 @@ public:
     double3 &u = prts.u(0);
 
     double3 B = emfields_.get().B(x);
-    double om_c = 2.0 * std::abs(qprime) * norm(B);
+    double gamma = std::sqrt(1.0 + norm2(u));
+    double om_c = 2.0 * std::abs(qprime) * norm(B) / gamma;
     double dt = std::min(dt_max, dt_max_gyro * 2.0 * constants::pi / om_c);
 
     while (t < t_max)

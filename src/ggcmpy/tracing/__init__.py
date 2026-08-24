@@ -183,7 +183,9 @@ class boris_push_python:
         """
         qprime = 0.5 * self._q / self._m
         B = self._fields.B(prts_df.loc[0, ["x", "y", "z"]].to_numpy())
-        om_c = 2.0 * np.abs(qprime) * np.linalg.norm(B)
+        u = prts_df.loc[0, ["ux", "uy", "uz"]].to_numpy()
+        gamma = np.sqrt(1 + np.linalg.norm(u) ** 2)
+        om_c = 2.0 * np.abs(qprime) * np.linalg.norm(B) / gamma
         dt = min(dt_max, dt_max_gyro * 2.0 * np.pi / om_c)
 
         while prts_df.loc[0, "time"] < t_max:  # type: ignore[operator]
