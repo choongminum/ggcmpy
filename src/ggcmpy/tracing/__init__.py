@@ -168,7 +168,8 @@ class boris_push_python:
     def push(
         self,
         prts_df: pd.DataFrame,
-        t_max: float,
+        t_max: float | None = None,
+        max_steps: int | None = None,
         dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
     ) -> pd.DataFrame:
@@ -178,6 +179,7 @@ class boris_push_python:
         Args:
             prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
             t_max (float): Maximum time to push the particles to.
+            max_steps (int | None): Maximum number of steps to take.
             dt_max (float): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
         """
@@ -190,7 +192,16 @@ class boris_push_python:
         if dt_max is not None:
             dt = min(dt_max, dt)
 
-        while prts_df.loc[0, "time"] < t_max:  # type: ignore[operator]
+        assert t_max is not None or max_steps is not None
+
+        step = 0
+        while True:
+            if t_max is not None and prts_df.loc[0, "time"] >= t_max:  # type: ignore[operator]
+                break
+
+            if max_steps is not None and step >= max_steps:
+                break
+
             prts_df.loc[0, ["x", "y", "z"]] = self.push_x(
                 prts_df.loc[0, ["x", "y", "z"]].to_numpy(),
                 prts_df.loc[0, ["ux", "uy", "uz"]].to_numpy(),
@@ -207,6 +218,7 @@ class boris_push_python:
                 0.5 * dt,
             )
             prts_df.loc[0, "time"] += dt
+            step += 1
 
         return prts_df
 
@@ -277,9 +289,9 @@ class BorisIntegratorBase:
         while prts_df.loc[0, "time"] < t_max:
             prts_df = boris_push.push(
                 prts_df,
-                prts_df.loc[0, "time"] + 1e-7,  # type: ignore[operator]
-                dt_max,
-                dt_max_gyro,
+                t_max=prts_df.loc[0, "time"] + 1e-7,  # type: ignore[operator]
+                dt_max=dt_max,
+                dt_max_gyro=dt_max_gyro,
             )
             snapshots.append(prts_df.copy())
 
