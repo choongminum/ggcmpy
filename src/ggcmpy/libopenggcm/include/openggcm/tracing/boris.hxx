@@ -63,7 +63,8 @@ public:
     u = up + dq * E / constants::c;
   }
 
-  void push(particles &prts, double t_max, std::optional<double> dt_max,
+  void push(particles &prts, std::optional<double> t_max,
+            std::optional<int> max_steps, std::optional<double> dt_max,
             double dt_max_gyro) const
   {
     double qprime = 0.5 * q_ / m_;
@@ -81,12 +82,23 @@ public:
       dt = std::min(dt_max.value(), dt);
     }
 
-    while (t < t_max)
+    int step = 0;
+    while (true)
     {
+      if (t_max.has_value() && t >= t_max.value())
+      {
+        break;
+      }
+      if (max_steps.has_value() && step >= max_steps.value())
+      {
+        break;
+      }
+
       push_x(x, u, .5 * dt);
       push_u(x, u, dt);
       push_x(x, u, .5 * dt);
       t += dt;
+      step++;
     }
   }
 
