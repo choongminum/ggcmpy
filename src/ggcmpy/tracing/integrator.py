@@ -53,7 +53,10 @@ class boris_base:
         while prts_df.iloc[0].time < t_max:
             # hack to make the boris push do just one time step
             prts_df = boris.push(
-                prts_df, prts_df.iloc[0].time + 1e-7, dt_max, dt_max_gyro
+                prts_df,
+                prts_df.iloc[0].time + 1e-7,
+                dt_max=dt_max,
+                dt_max_gyro=dt_max_gyro,
             )
             snapshots.append(prts_df)
 
