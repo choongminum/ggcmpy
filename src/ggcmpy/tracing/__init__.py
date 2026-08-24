@@ -15,8 +15,6 @@ import xarray as xr
 from .legacy import BorisIntegrator_cxx as BorisIntegrator_cxx
 from .legacy import BorisIntegrator_f2py as BorisIntegrator_f2py
 from .legacy import BorisIntegrator_python as BorisIntegrator_python
-from .legacy import FieldInterpolator_f2py as FieldInterpolator_f2py
-from .legacy import FieldInterpolatorYee_f2py as FieldInterpolatorYee_f2py
 
 # pylint: disable=C0103,I1101
 
