@@ -63,7 +63,8 @@ public:
     u = up + dq * E / constants::c;
   }
 
-  void push(particles &prts, double t_max, double dt_max, double gyro_max) const
+  void push(particles &prts, double t_max, double dt_max,
+            double dt_max_gyro) const
   {
     double qprime = 0.5 * q_ / m_;
 
@@ -73,7 +74,7 @@ public:
 
     double3 B = emfields_.get().B(x);
     double om_c = 2.0 * std::abs(qprime) * norm(B);
-    double dt = std::min(dt_max, gyro_max * 2.0 * constants::pi / om_c);
+    double dt = std::min(dt_max, dt_max_gyro * 2.0 * constants::pi / om_c);
 
     while (t < t_max)
     {
