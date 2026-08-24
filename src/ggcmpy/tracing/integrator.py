@@ -59,7 +59,7 @@ class boris_base:
                 dt_max=dt_max,
                 dt_max_gyro=dt_max_gyro,
             )
-            snapshots.append(prts_df)
+            snapshots.append(prts_df.copy())
 
         return pd.concat(snapshots, ignore_index=True)
 
