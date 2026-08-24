@@ -180,7 +180,11 @@ class BorisIntegratorBase:
         )
 
         return integrator_boris.integrate(
-            prts_df, t_final=t_final, dt_max=dt_max, dt_max_gyro=dt_max_gyro
+            prts_df,
+            t_final=t_final,
+            snapshot_interval_steps=1,
+            dt_max=dt_max,
+            dt_max_gyro=dt_max_gyro,
         )
 
 

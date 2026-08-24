@@ -45,16 +45,17 @@ class boris_base:
         t_final: float | None = None,
         dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
+        snapshot_interval_steps: int | None = None,
     ) -> pd.DataFrame:
         boris = self._boris_push_cls(self._fields, self._q, self._m)
 
         snapshots = [prts_df]
 
         while prts_df.iloc[0].time < t_final:
-            # hack to make the boris push do just one time step
             prts_df = boris.push(
                 prts_df,
-                max_steps=1,
+                t_final=t_final,
+                max_steps=snapshot_interval_steps,
                 dt_max=dt_max,
                 dt_max_gyro=dt_max_gyro,
             )
