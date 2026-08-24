@@ -22,9 +22,9 @@ class boris_base:
     Base class for Boris particle pusher.
 
     Methods:
-        push(prts, t_max, dt_max, gyro_max):
+        push(prts, t_max, dt_max, dt_max_gyro):
             Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
-            using a maximum time step of `dt_max` and a maximum gyro period of `gyro_max`.
+            using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
     """
 
     def __init__(
@@ -40,7 +40,7 @@ class boris_base:
         self._boris_push_cls = boris_push_cls
 
     def integrate(
-        self, prts_df: pd.DataFrame, t_max, dt_max=1.0, gyro_max=0.1
+        self, prts_df: pd.DataFrame, t_max, dt_max=1.0, dt_max_gyro=0.1
     ) -> pd.DataFrame:
         boris = self._boris_push_cls(self._fields, self._q, self._m)
 
@@ -48,7 +48,9 @@ class boris_base:
 
         while prts_df.iloc[0].time < t_max:
             # hack to make the boris push do just one time step
-            prts_df = boris.push(prts_df, prts_df.iloc[0].time + 1e-7, dt_max, gyro_max)
+            prts_df = boris.push(
+                prts_df, prts_df.iloc[0].time + 1e-7, dt_max, dt_max_gyro
+            )
             snapshots.append(prts_df)
 
         return pd.concat(snapshots, ignore_index=True)
@@ -59,9 +61,9 @@ class boris_python(boris_base):
     Boris particle pusher implemented in pure Python
 
     Methods:
-        push(prts, t_max, dt_max, gyro_max):
+        push(prts, t_max, dt_max, dt_max_gyro):
             Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
-            using a maximum time step of `dt_max` and a maximum gyro period of `gyro_max`.
+            using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
     """
 
     def __init__(
@@ -81,9 +83,9 @@ class boris_cxx(boris_base):
     Boris particle pusher implemented in C++.
 
     Methods:
-        push(prts, t_max, dt_max, gyro_max):
+        push(prts, t_max, dt_max, dt_max_gyro):
             Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
-            using a maximum time step of `dt_max` and a maximum gyro period of `gyro_max`.
+            using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
     """
 
     def __init__(
