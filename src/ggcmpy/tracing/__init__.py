@@ -178,9 +178,9 @@ class boris_push_python:
 
         Args:
             prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
-            t_max (float): Maximum time to push the particles to.
+            t_max (float | None): Maximum time to push the particles to.
             max_steps (int | None): Maximum number of steps to take.
-            dt_max (float): Maximum time step for the integration.
+            dt_max (float | None): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
         """
         qprime = 0.5 * self._q / self._m
@@ -399,19 +399,31 @@ class boris_push_cxx(_openggcm.tracing.boris):  # type: ignore[misc]
     """Wrapper class for the C++ boris class, providing a convenient interface for particle integration."""
 
     def push(
-        self, prts_df: pd.DataFrame, t_max: float, dt_max: float, dt_max_gyro: float
+        self,
+        prts_df: pd.DataFrame,
+        t_max: float | None = None,
+        max_steps: int | None = None,
+        dt_max: float | None = None,
+        dt_max_gyro: float = 0.1,
     ) -> pd.DataFrame:
         """
         Pushes the particles in `prts_df` from their current state.
 
         Args:
             prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
-            t_max (float): Maximum time to push the particles to.
-            dt_max (float): Maximum time step for the integration.
+            t_max (float | None): Maximum time to push the particles to.
+            max_steps (int | None): Maximum number of steps to take.
+            dt_max (float | None): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
         """
         prts = particles_cxx(prts_df)
-        super().push(prts, t_max, dt_max, dt_max_gyro)
+        super().push(
+            prts,
+            t_max=t_max,
+            max_steps=max_steps,
+            dt_max=dt_max,
+            dt_max_gyro=dt_max_gyro,
+        )
         return prts.to_dataframe()
 
 
