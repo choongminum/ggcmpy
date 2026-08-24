@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from ggcmpy import constants
+from ggcmpy import _openggcm, constants  # type: ignore[attr-defined]
 from ggcmpy.tracing import emfields
 
 
@@ -116,3 +116,55 @@ class boris_push_python:
             ]
         )
         return up + dq * E / constants.c
+
+
+class particles_cxx(_openggcm.tracing.particles):  # type: ignore[misc]
+    """Wrapper class for the C++ particles class, providing a convenient interface for particle data management."""
+
+    def __new__(cls, df: pd.DataFrame) -> particles_cxx:
+        t = df["time"].to_numpy()
+        r = df[["x", "y", "z"]].to_numpy()
+        u = df[["ux", "uy", "uz"]].to_numpy()
+        return super().__new__(cls, t, r, u)  # type: ignore[no-any-return] # pylint: disable=E1121
+
+    def __init__(self, df: pd.DataFrame) -> None:
+        pass
+
+    def to_dataframe(self) -> pd.DataFrame:
+        t, r, u = self.to_tuple()
+        return pd.DataFrame(
+            np.column_stack((t, r, u)),
+            columns=("time", "x", "y", "z", "ux", "uy", "uz"),
+        )
+
+
+class boris_push_cxx(_openggcm.tracing.boris):  # type: ignore[misc]
+    """Wrapper class for the C++ boris class, providing a convenient interface for particle integration."""
+
+    def push(
+        self,
+        prts_df: pd.DataFrame,
+        t_final: float | None = None,
+        max_steps: int | None = None,
+        dt_max: float | None = None,
+        dt_max_gyro: float = 0.1,
+    ) -> pd.DataFrame:
+        """
+        Pushes the particles in `prts_df` from their current state.
+
+        Args:
+            prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
+            t_final (float | None): Final time to push the particles to.
+            max_steps (int | None): Maximum number of steps to take.
+            dt_max (float | None): Maximum time step for the integration.
+            dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
+        """
+        prts = particles_cxx(prts_df)
+        super().push(
+            prts,
+            t_final=t_final,
+            max_steps=max_steps,
+            dt_max=dt_max,
+            dt_max_gyro=dt_max_gyro,
+        )
+        return prts.to_dataframe()
