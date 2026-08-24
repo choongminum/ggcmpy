@@ -43,6 +43,8 @@ class boris_push_python:
             dt_max (float | None): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
         """
+        prts_df = prts_df.copy()  # don't modify input
+
         qprime = 0.5 * self._q / self._m
         B = self._fields.B(prts_df.loc[0, ["x", "y", "z"]].to_numpy())
         u = prts_df.loc[0, ["ux", "uy", "uz"]].to_numpy()
