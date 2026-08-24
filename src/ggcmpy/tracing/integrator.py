@@ -22,9 +22,8 @@ class boris_base:
     Base class for Boris particle pusher.
 
     Methods:
-        push(prts, t_max, dt_max, dt_max_gyro):
-            Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
-            using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
+        integrate(prts, ...):
+            Pushes the particles in `prts`.
     """
 
     def __init__(
@@ -42,7 +41,7 @@ class boris_base:
     def integrate(
         self,
         prts_df: pd.DataFrame,
-        t_max: float,
+        t_final: float | None = None,
         dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
     ) -> pd.DataFrame:
@@ -50,7 +49,7 @@ class boris_base:
 
         snapshots = [prts_df]
 
-        while prts_df.iloc[0].time < t_max:
+        while prts_df.iloc[0].time < t_final:
             # hack to make the boris push do just one time step
             prts_df = boris.push(
                 prts_df,
@@ -68,8 +67,8 @@ class boris_python(boris_base):
     Boris particle pusher implemented in pure Python
 
     Methods:
-        push(prts, t_max, dt_max, dt_max_gyro):
-            Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
+        push(prts, t_final, dt_max, dt_max_gyro):
+            Pushes the particles in `prts` from their current state to a maximum time of `t_final`,
             using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
     """
 
@@ -90,8 +89,8 @@ class boris_cxx(boris_base):
     Boris particle pusher implemented in C++.
 
     Methods:
-        push(prts, t_max, dt_max, dt_max_gyro):
-            Pushes the particles in `prts` from their current state to a maximum time of `t_max`,
+        push(prts, t_final, dt_max, dt_max_gyro):
+            Pushes the particles in `prts` from their current state to a maximum time of `t_final`,
             using a maximum time step of `dt_max` and a maximum gyro period of `dt_max_gyro`.
     """
 

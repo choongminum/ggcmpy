@@ -291,7 +291,7 @@ NB_MODULE(_openggcm, m)
       .def(nb::init<const emfields &, double, double>(), "emfields"_a, "q"_a,
            "m"_a)
       .def("__repr__", &boris::repr)
-      .def("push", &boris::push, "prts"_a, "t_max"_a = nb::none(),
+      .def("push", &boris::push, "prts"_a, "t_final"_a = nb::none(),
            "max_steps"_a = nb::none(), "dt_max"_a = nb::none(),
            "dt_max_gyro"_a = 0.1);
 }

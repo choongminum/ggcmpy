@@ -79,12 +79,12 @@ def test_BorisIntegrator_uniform(Integrator):
     u0 = gamma * v0 / constants.c
     om_ce = q * B_0 / (gamma * m)  # [rad/s]
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
-    t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
+    t_final = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
-    dt = t_max / steps  # [s]
+    dt = t_final / steps  # [s]
 
     boris = Integrator(emfields, q, m)
-    df = boris.integrate(x0, u0, t_max, dt)
+    df = boris.integrate(x0, u0, t_final=t_final, dt_max=dt)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
@@ -119,12 +119,12 @@ def test_BorisIntegrator(Integrator):
     u0 = gamma * v0 / constants.c
     om_ce = q * B_0 / (gamma * m)  # [rad/s]
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
-    t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
+    t_final = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
-    dt = t_max / steps  # [s]
+    dt = t_final / steps  # [s]
 
     boris = Integrator(field_cc, q, m)
-    df = boris.integrate(x0, u0, t_max, dt)
+    df = boris.integrate(x0, u0, t_final=t_final, dt_max=dt)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
@@ -161,12 +161,12 @@ def test_BorisIntegratorYee(Integrator):
     u0 = gamma * v0 / constants.c
     om_ce = q * B_0 / (gamma * m)  # [rad/s]
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
-    t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
+    t_final = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
-    dt = t_max / steps  # [s]
+    dt = t_final / steps  # [s]
 
     boris = Integrator(field_yee, q, m)
-    df = boris.integrate(x0, u0, t_max, dt)
+    df = boris.integrate(x0, u0, t_final=t_final, dt_max=dt)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
