@@ -40,7 +40,11 @@ class boris_base:
         self._boris_push_cls = boris_push_cls
 
     def integrate(
-        self, prts_df: pd.DataFrame, t_max, dt_max=1.0, dt_max_gyro=0.1
+        self,
+        prts_df: pd.DataFrame,
+        t_max: float,
+        dt_max: float | None = None,
+        dt_max_gyro: float = 0.1,
     ) -> pd.DataFrame:
         boris = self._boris_push_cls(self._fields, self._q, self._m)
 

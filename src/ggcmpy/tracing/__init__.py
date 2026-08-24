@@ -169,7 +169,7 @@ class boris_push_python:
         self,
         prts_df: pd.DataFrame,
         t_max: float,
-        dt_max: float,
+        dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
     ) -> pd.DataFrame:
         """
@@ -186,7 +186,9 @@ class boris_push_python:
         u = prts_df.loc[0, ["ux", "uy", "uz"]].to_numpy()
         gamma = np.sqrt(1 + np.linalg.norm(u) ** 2)
         om_c = 2.0 * np.abs(qprime) * np.linalg.norm(B) / gamma
-        dt = min(dt_max, dt_max_gyro * 2.0 * np.pi / om_c)
+        dt = dt_max_gyro * 2.0 * np.pi / om_c
+        if dt_max is not None:
+            dt = min(dt_max, dt)
 
         while prts_df.loc[0, "time"] < t_max:  # type: ignore[operator]
             prts_df.loc[0, ["x", "y", "z"]] = self.push_x(
