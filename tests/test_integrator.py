@@ -34,13 +34,12 @@ def test_boris_integrator_uniform(integrator):
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
     t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
-    dt = t_max / steps  # [s]
     prts_df = pd.DataFrame(
         np.array([[0.0, *x0, *u0]]), columns=["time", "x", "y", "z", "ux", "uy", "uz"]
     )
 
     boris = integrator(fields, q, m)
-    df = boris.integrate(prts_df, t_max=t_max, dt_max=dt)
+    df = boris.integrate(prts_df, t_max=t_max, dt_max_gyro=1.0 / steps)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
