@@ -54,7 +54,7 @@ class boris_base:
             # hack to make the boris push do just one time step
             prts_df = boris.push(
                 prts_df,
-                prts_df.iloc[0].time + 1e-7,
+                max_steps=1,
                 dt_max=dt_max,
                 dt_max_gyro=dt_max_gyro,
             )
