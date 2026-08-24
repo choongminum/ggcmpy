@@ -40,7 +40,7 @@ def test_boris_integrator_uniform(integrator):
     )
 
     boris = integrator(fields, q, m)
-    df = boris.integrate(prts_df, t_max, dt)
+    df = boris.integrate(prts_df, t_max=t_max, dt_max=dt)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
