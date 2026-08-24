@@ -12,7 +12,8 @@ import xarray as xr
 from ggcmpy import (
     constants,
 )
-from ggcmpy.tracing import boris_push_cxx, boris_push_python, emfields
+from ggcmpy.tracing import boris_push_cxx, emfields
+from ggcmpy.tracing.boris_push import boris_push_python
 
 # pylint: disable=C0103
 
