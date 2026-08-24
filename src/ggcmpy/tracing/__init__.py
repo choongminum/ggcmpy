@@ -1,5 +1,5 @@
 """
-tracing.py
+__init__.py
 
 Particle tracing
 """
@@ -12,9 +12,9 @@ from typing import Any
 import numpy as np
 import xarray as xr
 
-from .legacy import BorisIntegrator_cxx as BorisIntegrator_cxx
-from .legacy import BorisIntegrator_f2py as BorisIntegrator_f2py
-from .legacy import BorisIntegrator_python as BorisIntegrator_python
+from . import emfields as emfields
+from . import integrator as integrator
+from . import legacy as legacy
 
 # pylint: disable=C0103,I1101
 
