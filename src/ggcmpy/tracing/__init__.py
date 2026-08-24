@@ -10,15 +10,11 @@ from collections.abc import Callable, Sequence
 from typing import Any
 
 import numpy as np
-import pandas as pd
 import xarray as xr
-from scipy import constants  # type: ignore[import-untyped]
-
-from ggcmpy import _jrrle  # type: ignore[attr-defined]
 
 from .legacy import BorisIntegrator_cxx as BorisIntegrator_cxx
+from .legacy import BorisIntegrator_f2py as BorisIntegrator_f2py
 from .legacy import BorisIntegrator_python as BorisIntegrator_python
-from .legacy import BorisIntegratorBase
 from .legacy import FieldInterpolator_f2py as FieldInterpolator_f2py
 from .legacy import FieldInterpolatorYee_f2py as FieldInterpolatorYee_f2py
 
@@ -73,49 +69,6 @@ def discretize_emfields_yee(coords: dict[str, np.ndarray], fields: Any) -> xr.Da
         | make_vector_field(e1_grid, coords, fields.E),
         coords=coords,
     )
-
-
-class BorisIntegrator_f2py(BorisIntegratorBase):
-    """
-    BorisIntegrator_f2py provides an interface for integrating charged particle trajectories
-    using the Boris algorithm, with field interpolation via f2py-wrapped Fortran routines.
-
-    Args:
-        ds (xr.Dataset or emfields.interpolator_python or emfields.interpolator_yee_python):
-            The dataset containing electromagnetic field data, or a pre-initialized field interpolator.
-        q (float, optional):
-            Particle charge in Coulombs. Defaults to the elementary charge (constants.e).
-        m (float, optional):
-            Particle mass in kilograms. Defaults to the electron mass (constants.m_e).
-
-    Attributes:
-        q (float): Particle charge.
-        m (float): Particle mass.
-
-    Methods:
-        integrate(x0, v0, t_final, dt) -> pd.DataFrame:
-            Integrates the particle trajectory using the Boris algorithm.
-    """
-
-    def __init__(self, df, q=constants.e, m=constants.m_e) -> None:
-        _jrrle.particle_tracing_f2py.boris_init(q, m)
-        if isinstance(df, xr.Dataset):
-            fields = FieldInterpolatorYee_f2py(df)
-        else:
-            assert isinstance(df, FieldInterpolatorYee_f2py)
-            fields = df
-
-        super().__init__(fields, q, m)
-
-    def integrate(self, x0, u0, t_final, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
-        n_steps = int(t_final / dt_max) + 2  # add some extra space for round-off issues
-        data = np.zeros((7, n_steps), dtype=np.float32, order="F")
-        n_out = _jrrle.particle_tracing_f2py.boris_integrate(
-            x0, u0, t_final, dt_max, dt_max_gyro, data
-        )
-        return pd.DataFrame(
-            data.T[:n_out], columns=["time", "x", "y", "z", "ux", "uy", "uz"]
-        )
 
 
 BorisIntegrator = BorisIntegrator_python
