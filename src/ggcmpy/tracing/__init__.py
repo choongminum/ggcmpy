@@ -67,6 +67,3 @@ def discretize_emfields_yee(coords: dict[str, np.ndarray], fields: Any) -> xr.Da
         | make_vector_field(e1_grid, coords, fields.E),
         coords=coords,
     )
-
-
-BorisIntegrator = BorisIntegrator_python
