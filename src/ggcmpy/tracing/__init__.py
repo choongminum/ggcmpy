@@ -289,7 +289,7 @@ class BorisIntegratorBase:
         while prts_df.loc[0, "time"] < t_max:
             prts_df = boris_push.push(
                 prts_df,
-                t_max=prts_df.loc[0, "time"] + 1e-7,  # type: ignore[operator]
+                max_steps=1,
                 dt_max=dt_max,
                 dt_max_gyro=dt_max_gyro,
             )
