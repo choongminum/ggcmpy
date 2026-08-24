@@ -12,6 +12,10 @@ from ggcmpy.tracing import emfields, integrator
 R_E = constants.radius_earth  # [m]
 
 
+def gyro_frequency(B: float, q: float, m: float, gamma: float) -> float:
+    return np.abs(q) * B / (gamma * m)  # type: ignore[no-any-return]
+
+
 @pytest.mark.parametrize(
     "integrator",
     [
@@ -30,8 +34,10 @@ def test_boris_integrator_uniform(integrator):
     v0 = np.array([0.0, v_0, 0.0])  # [m/s]
     gamma = 1.0 / np.sqrt(1 - (np.linalg.norm(v0) / constants.c) ** 2)
     u0 = gamma * v0 / constants.c
-    om_ce = q * B_0 / (gamma * m)  # [rad/s]
+
+    om_ce = gyro_frequency(B_0, q, m, gamma)
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
+
     t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
     prts_df = pd.DataFrame(
@@ -56,9 +62,6 @@ def test_boris_integrator_uniform(integrator):
 @pytest.mark.mpl_image_compare
 def test_boris_integrator_dipole():
     """particle gyrating / bouncing in a dipole magnetic field"""
-
-    def gyro_frequency(B: float, q: float, m: float, gamma: float) -> float:
-        return np.abs(q) * B / (gamma * m)  # type: ignore[no-any-return]
 
     fields = emfields.dipole_cxx(m=constants.dipole_moment_earth)  # [A m^2]
 
