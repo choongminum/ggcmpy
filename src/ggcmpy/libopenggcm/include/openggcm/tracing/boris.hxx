@@ -63,7 +63,7 @@ public:
     u = up + dq * E / constants::c;
   }
 
-  void push(particles &prts, std::optional<double> t_max,
+  void push(particles &prts, std::optional<double> t_final,
             std::optional<int> max_steps, std::optional<double> dt_max,
             double dt_max_gyro) const
   {
@@ -85,7 +85,7 @@ public:
     int step = 0;
     while (true)
     {
-      if (t_max.has_value() && t >= t_max.value())
+      if (t_final.has_value() && t >= t_final.value())
       {
         break;
       }

@@ -38,14 +38,14 @@ def test_boris_integrator_uniform(integrator):
     om_ce = gyro_frequency(B_0, q, m, gamma)
     r_ce = m * np.linalg.norm(u0) * constants.c / (np.abs(q) * B_0)  # [m]
 
-    t_max = 2 * np.pi / om_ce  # one gyroperiod # [s]
+    t_final = 2 * np.pi / om_ce  # one gyroperiod # [s]
     steps = 100
     prts_df = pd.DataFrame(
         np.array([[0.0, *x0, *u0]]), columns=["time", "x", "y", "z", "ux", "uy", "uz"]
     )
 
     boris = integrator(fields, q, m)
-    df = boris.integrate(prts_df, t_max=t_max, dt_max_gyro=1.0 / steps)
+    df = boris.integrate(prts_df, t_final=t_final, dt_max_gyro=1.0 / steps)
 
     assert len(df) >= steps
     assert len(df) <= steps + 2
@@ -82,14 +82,14 @@ def test_boris_integrator_dipole():
     print(f"B={B_0} [T] om_ce={om_ce:.2f} [1/s] r_ce={r_ce:.2f} [m]")
 
     t_ce = 2.0 * np.pi / om_ce  # [s]
-    t_max = 100.0 * t_ce  # [s]
+    t_final = 100.0 * t_ce  # [s]
 
     prts = pd.DataFrame(
         np.array([[0.0, *x0, *u0]]), columns=["time", "x", "y", "z", "ux", "uy", "uz"]
     )
 
     boris = ggcmpy.tracing.integrator.boris_cxx(fields, q, m)
-    df = boris.integrate(prts, t_max)
+    df = boris.integrate(prts, t_final=t_final)
 
     B_final = np.linalg.norm(fields.B(df.loc[df.index[-1], ["x", "y", "z"]].to_numpy()))
     om_ce_final = gyro_frequency(B_final, q, m, gamma)
@@ -99,7 +99,7 @@ def test_boris_integrator_dipole():
     df[df.time < 5.0 * t_ce].plot(
         x="x", y="z", style=".-", ax=axs[0], title="First 5 t_ce"
     )
-    df[df.time >= t_max - 5.0 * t_ce_final].plot(
+    df[df.time >= t_final - 5.0 * t_ce_final].plot(
         x="x", y="z", style=".-", ax=axs[1], title="Last 5 t_ce "
     )
     df.plot(x="x", y="z", style="-", ax=axs[2], title="All steps")

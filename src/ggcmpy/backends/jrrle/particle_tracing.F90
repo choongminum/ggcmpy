@@ -207,7 +207,7 @@ contains
       this%m = m
    end subroutine boris_integrator_t_init
 
-   subroutine boris_integrator_t_integrate(this, x0, u0, get_E, get_B, t_max, dt_max, dt_max_gyro, data, n_out)
+   subroutine boris_integrator_t_integrate(this, x0, u0, get_E, get_B, t_final, dt_max, dt_max_gyro, data, n_out)
       class(boris_integrator_t), intent(in) :: this
       real, dimension(3), intent(in) :: x0
       real, dimension(3), intent(in) :: u0
@@ -221,7 +221,7 @@ contains
             real, dimension(3) :: B
          end function get_B
       end interface
-      real, intent(in) :: t_max, dt_max, dt_max_gyro
+      real, intent(in) :: t_final, dt_max, dt_max_gyro
       real, dimension(:, 0:), intent(out) :: data
       integer, intent(out) :: n_out
 
@@ -242,7 +242,7 @@ contains
       ! times, positions, velocities = [], [], []
       B = get_B(x)
       step = 0
-      do while (t < t_max)
+      do while (t < t_final)
          if (step < n_data) then
             data(1, step) = t
             data(2:4, step) = x
@@ -380,16 +380,16 @@ contains
       E = [interpolate_yee(x(1), x(2), x(3), 3), interpolate_yee(x(1), x(2), x(3), 4), interpolate_yee(x(1), x(2), x(3), 5)]
    end function get_E
 
-   subroutine boris_integrate(x0, v0, t_max, dt_max, dt_max_gyro, data, n_out, n_data)
+   subroutine boris_integrate(x0, v0, t_final, dt_max, dt_max_gyro, data, n_out, n_data)
       real, dimension(3), intent(in) :: x0
       real, dimension(3), intent(in) :: v0
-      real, intent(in) :: t_max, dt_max, dt_max_gyro
+      real, intent(in) :: t_final, dt_max, dt_max_gyro
       real, dimension(7, n_data) :: data
       integer, intent(out) :: n_out
       integer, intent(in) :: n_data
       !f2py intent(hide) :: n_data
 
-      call boris_integrator%integrate(x0, v0, get_E, get_B, t_max, dt_max, dt_max_gyro, data, n_out)
+      call boris_integrator%integrate(x0, v0, get_E, get_B, t_final, dt_max, dt_max_gyro, data, n_out)
    end subroutine boris_integrate
 
 end module particle_tracing_f2py

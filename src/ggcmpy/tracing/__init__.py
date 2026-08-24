@@ -168,7 +168,7 @@ class boris_push_python:
     def push(
         self,
         prts_df: pd.DataFrame,
-        t_max: float | None = None,
+        t_final: float | None = None,
         max_steps: int | None = None,
         dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
@@ -178,7 +178,7 @@ class boris_push_python:
 
         Args:
             prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
-            t_max (float | None): Maximum time to push the particles to.
+            t_final (float | None): Final time to push the particles to.
             max_steps (int | None): Maximum number of steps to take.
             dt_max (float | None): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
@@ -192,11 +192,11 @@ class boris_push_python:
         if dt_max is not None:
             dt = min(dt_max, dt)
 
-        assert t_max is not None or max_steps is not None
+        assert t_final is not None or max_steps is not None
 
         step = 0
         while True:
-            if t_max is not None and prts_df.loc[0, "time"] >= t_max:  # type: ignore[operator]
+            if t_final is not None and prts_df.loc[0, "time"] >= t_final:  # type: ignore[operator]
                 break
 
             if max_steps is not None and step >= max_steps:
@@ -277,7 +277,7 @@ class BorisIntegratorBase:
         self._m = m
         self._boris_push_cls = boris_push_cls
 
-    def integrate(self, x0, u0, t_max, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
+    def integrate(self, x0, u0, t_final, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
         boris_push = self._boris_push_cls(self._fields, self._q, self._m)
 
         prts_df = pd.DataFrame(
@@ -286,7 +286,7 @@ class BorisIntegratorBase:
         )
         snapshots = [prts_df.copy()]
 
-        while prts_df.loc[0, "time"] < t_max:
+        while prts_df.loc[0, "time"] < t_final:
             prts_df = boris_push.push(
                 prts_df,
                 max_steps=1,
@@ -316,7 +316,7 @@ class BorisIntegrator_python(BorisIntegratorBase):
         m (float): Particle mass.
 
     Methods:
-        integrate(x0, v0, t_max, dt) -> pd.DataFrame:
+        integrate(x0, v0, t_final, dt) -> pd.DataFrame:
             Integrates the particle trajectory using the Boris algorithm.
     """
 
@@ -350,7 +350,7 @@ class BorisIntegrator_f2py(BorisIntegratorBase):
         m (float): Particle mass.
 
     Methods:
-        integrate(x0, v0, t_max, dt) -> pd.DataFrame:
+        integrate(x0, v0, t_final, dt) -> pd.DataFrame:
             Integrates the particle trajectory using the Boris algorithm.
     """
 
@@ -364,11 +364,11 @@ class BorisIntegrator_f2py(BorisIntegratorBase):
 
         super().__init__(fields, q, m)
 
-    def integrate(self, x0, u0, t_max, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
-        n_steps = int(t_max / dt_max) + 2  # add some extra space for round-off issues
+    def integrate(self, x0, u0, t_final, dt_max=1.0, dt_max_gyro=0.1) -> pd.DataFrame:
+        n_steps = int(t_final / dt_max) + 2  # add some extra space for round-off issues
         data = np.zeros((7, n_steps), dtype=np.float32, order="F")
         n_out = _jrrle.particle_tracing_f2py.boris_integrate(
-            x0, u0, t_max, dt_max, dt_max_gyro, data
+            x0, u0, t_final, dt_max, dt_max_gyro, data
         )
         return pd.DataFrame(
             data.T[:n_out], columns=["time", "x", "y", "z", "ux", "uy", "uz"]
@@ -401,7 +401,7 @@ class boris_push_cxx(_openggcm.tracing.boris):  # type: ignore[misc]
     def push(
         self,
         prts_df: pd.DataFrame,
-        t_max: float | None = None,
+        t_final: float | None = None,
         max_steps: int | None = None,
         dt_max: float | None = None,
         dt_max_gyro: float = 0.1,
@@ -411,7 +411,7 @@ class boris_push_cxx(_openggcm.tracing.boris):  # type: ignore[misc]
 
         Args:
             prts_df (pd.DataFrame): DataFrame containing particle states with columns ['time', 'x', 'y', 'z', 'ux', 'uy', 'uz'].
-            t_max (float | None): Maximum time to push the particles to.
+            t_final (float | None): Final time to push the particles to.
             max_steps (int | None): Maximum number of steps to take.
             dt_max (float | None): Maximum time step for the integration.
             dt_max_gyro (float): Maximum time step as fraction of the gyroperiod.
@@ -419,7 +419,7 @@ class boris_push_cxx(_openggcm.tracing.boris):  # type: ignore[misc]
         prts = particles_cxx(prts_df)
         super().push(
             prts,
-            t_max=t_max,
+            t_final=t_final,
             max_steps=max_steps,
             dt_max=dt_max,
             dt_max_gyro=dt_max_gyro,
@@ -445,7 +445,7 @@ class BorisIntegrator_cxx(BorisIntegratorBase):
         m (float): Particle mass.
 
     Methods:
-        integrate(x0, v0, t_max, dt) -> pd.DataFrame:
+        integrate(x0, v0, t_final, dt) -> pd.DataFrame:
             Integrates the particle trajectory using the Boris algorithm.
     """
 
