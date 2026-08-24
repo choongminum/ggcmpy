@@ -14,6 +14,8 @@ from ggcmpy import (  # type: ignore[attr-defined]
 )
 from ggcmpy.tracing import emfields, integrator
 
+# pylint: disable=C0103,I1101
+
 
 class FieldInterpolator_f2py:
     """

@@ -12,9 +12,9 @@ from typing import Any
 import numpy as np
 import xarray as xr
 
-from . import emfields as emfields
-from . import integrator as integrator
-from . import legacy as legacy
+from . import emfields as emfields  # pylint: disable=useless-import-alias
+from . import integrator as integrator  # pylint: disable=useless-import-alias
+from . import legacy as legacy  # pylint: disable=useless-import-alias
 
 # pylint: disable=C0103,I1101
 

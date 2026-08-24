@@ -12,6 +12,8 @@ import pandas as pd
 from ggcmpy import _openggcm, constants  # type: ignore[attr-defined]
 from ggcmpy.tracing import emfields
 
+# pylint: disable=C0103,I1101
+
 
 class boris_push_python:
     """
