@@ -23,7 +23,6 @@ from . import (  # type: ignore[attr-defined]
 )
 
 # ref: https://articles.adsabs.harvard.edu//full/1995SSRv...71..743R/0000748.000.html
-
 CANOPUS_MAGNETOMETERS = {
     "BK": {"name": "Back", "lat": 57.7, "lon": 265.8},
     "CL": {"name": "Contwoyto LK", "lat": 65.8, "lon": 248.8},
