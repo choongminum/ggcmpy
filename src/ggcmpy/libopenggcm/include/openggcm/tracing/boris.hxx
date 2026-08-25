@@ -82,6 +82,12 @@ public:
       dt = std::min(dt_max.value(), dt);
     }
 
+    if (!t_final.has_value() && !max_steps.has_value())
+    {
+      throw std::runtime_error(
+          "boris::push: either t_final or max_steps must be specified");
+    }
+
     int step = 0;
     while (true)
     {

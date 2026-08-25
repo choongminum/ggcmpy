@@ -62,8 +62,8 @@ def test_interpolate():
 @pytest.mark.parametrize(
     "Integrator",
     [
-        ggcmpy.tracing.BorisIntegrator_python,
-        ggcmpy.tracing.BorisIntegrator_cxx,
+        ggcmpy.tracing.legacy.BorisIntegrator_python,
+        ggcmpy.tracing.legacy.BorisIntegrator_cxx,
     ],
 )
 def test_BorisIntegrator_uniform(Integrator):
@@ -101,7 +101,7 @@ def test_BorisIntegrator_uniform(Integrator):
 @pytest.mark.parametrize(
     "Integrator",
     [
-        ggcmpy.tracing.BorisIntegrator_python,
+        ggcmpy.tracing.legacy.BorisIntegrator_python,
     ],
 )
 def test_BorisIntegrator(Integrator):
@@ -141,9 +141,9 @@ def test_BorisIntegrator(Integrator):
 @pytest.mark.parametrize(
     "Integrator",
     [
-        ggcmpy.tracing.BorisIntegrator_python,
-        ggcmpy.tracing.BorisIntegrator_f2py,
-        ggcmpy.tracing.BorisIntegrator_cxx,
+        ggcmpy.tracing.legacy.BorisIntegrator_python,
+        ggcmpy.tracing.legacy.BorisIntegrator_f2py,
+        ggcmpy.tracing.legacy.BorisIntegrator_cxx,
     ],
 )
 def test_BorisIntegratorYee(Integrator):
