@@ -87,11 +87,9 @@ def draw_coastlines_polar(ax: Any, lats_min: int, time: np.datetime64 | None) ->
         )
         return
 
-    # Fetch low-resolution coastline polygons.
     feature = cfeature.COASTLINE.with_scale("110m")
 
-    # Vectorize the transformation function to evaluate the entire
-    # coastline array.
+    # Vectorize the transformation function.
     vec_cotr = np.vectorize(
         lambda lat, lon: _cotr_geo_sm_lat_lon(time, float(lat), float(lon))
     )
@@ -100,15 +98,9 @@ def draw_coastlines_polar(ax: Any, lats_min: int, time: np.datetime64 | None) ->
         lines = geom.geoms if geom.geom_type == "MultiLineString" else [geom]
         for line in lines:
             coords = np.asarray(line.coords)
-
-            # Transform coastline in GEO coordinates to SM coordinates.
             plot_lats, plot_lons = vec_cotr(coords[:, 1], coords[:, 0])
-
             theta = np.deg2rad(plot_lons)
-
-            # Calculate plotting radius dynamically based on hemisphere.
             r = 90.0 - plot_lats if lats_min >= 0 else 90.0 + plot_lats
-
             ax.plot(theta, r, color="black", linewidth=0.4)
 
 
@@ -139,13 +131,10 @@ def draw_magnetometers(
         stn_lat = float(station["lat"])  # type: ignore[arg-type]
         stn_lon = float(station["lon"])  # type: ignore[arg-type]
 
-        # Transform geographic station coordinates to SM.
         plot_lat, plot_lon = _cotr_geo_sm_lat_lon(time, stn_lat, stn_lon)
-
         theta = np.deg2rad(plot_lon)
         r = 90.0 - plot_lat if lats_min >= 0 else 90.0 + plot_lat
 
-        # Visually emphasize the user-selected station.
         if name == highlight:
             ax.scatter(theta, r, s=40, color="green", zorder=6)
         else:
@@ -194,7 +183,7 @@ def plot_from_dataarray(
 
     da = transform_geo_to_sm(da)
 
-    # Determine the coordinate names ('lats/longs' natively or 'mlat/mlon' if transformed).
+    # Determine the coordinate names.
     lat_name = "mlat" if "mlat" in da.coords else "lats"
     lon_name = "mlon" if "mlon" in da.coords else "longs"
 
@@ -213,7 +202,7 @@ def plot_from_dataarray(
     lat_vals = plot_data.coords[lat_name].values
     lon_vals = plot_data.coords[lon_name].values
 
-    # Grid preparation
+    # Prepare the grid.
     r_1d = 90.0 - lat_vals if lats_min >= 0 else 90.0 + lat_vals
     theta_1d = np.deg2rad(lon_vals)
     theta_grid, r_grid = np.meshgrid(theta_1d, r_1d)
@@ -328,8 +317,6 @@ def main() -> None:
     args = get_args()
     try:
         with xr.open_dataset(args.file) as ds:
-            # Route the plot request through the OpenGGCM accessor.
-            # The accessor will delegate to plot_from_dataarray().
             ds[args.var].ggcm.plot(
                 lats_max=args.lats_max,
                 lats_min=args.lats_min,

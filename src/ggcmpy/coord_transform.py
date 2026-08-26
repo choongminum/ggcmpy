@@ -40,7 +40,11 @@ def transform_geo_to_sm(da: xr.DataArray) -> xr.DataArray:
         z_ext = np.concatenate([z_vals, z_vals, z_vals], axis=1)
 
     interp = scipy.interpolate.RegularGridInterpolator(
-        (lat_vals, lon_ext), z_ext, method="linear", bounds_error=False, fill_value=None
+        (lat_vals, lon_ext),
+        z_ext,
+        method="linear",
+        bounds_error=False,
+        fill_value=None,
     )
 
     # 2. Create the target grid (SM).
@@ -101,7 +105,11 @@ def transform_sm_to_geo(da: xr.DataArray) -> xr.DataArray:
         z_ext = np.concatenate([z_vals, z_vals, z_vals], axis=1)
 
     interp = scipy.interpolate.RegularGridInterpolator(
-        (lat_vals, lon_ext), z_ext, method="linear", bounds_error=False, fill_value=None
+        (lat_vals, lon_ext),
+        z_ext,
+        method="linear",
+        bounds_error=False,
+        fill_value=None,
     )
 
     # 2. Create the target grid (GEO).
