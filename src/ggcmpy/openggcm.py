@@ -565,6 +565,15 @@ def _cotr_geo_sm_lat_lon(
     return _cart_to_lat_lon(pos_cart_sm)
 
 
+def _cotr_sm_geo_lat_lon(
+    time: np.datetime64, lat: float, lon: float
+) -> tuple[NDArray[Any], NDArray[Any]]:
+    # time = time.values
+    pos_cart_sm = _lat_lon_to_cart(lat, lon)
+    pos_cart_geo = cotr(time, "sm", "geo", pos_cart_sm)
+    return _cart_to_lat_lon(pos_cart_geo)
+
+
 def _at_station(delb: xr.DataArray, lat: Any, lon: Any) -> float:
     """
     Returns quantity at a given geographic coordinates.
