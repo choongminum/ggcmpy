@@ -267,7 +267,7 @@ def plot_from_dataarray(
 
 def get_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Plot OpenGGCM/GITM polar data")
+    parser = argparse.ArgumentParser(description="Plot OpenGGCM polar data")
     group = parser.add_mutually_exclusive_group()
 
     group.add_argument("-n", "--north", action="store_true")
