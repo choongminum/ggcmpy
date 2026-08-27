@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt  # type: ignore[import-not-found]
 import numpy as np
 import xarray as xr
 
-# Define longitude choices.
+# Define longitude choices for plot tick labels.
 grids_theta_mlt = (
     "12",
     "14",
