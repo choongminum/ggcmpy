@@ -248,9 +248,11 @@ def get_args() -> argparse.Namespace:
 
     args = parser.parse_args()
 
+    # Reject overlapping constraints.
     if (args.north or args.south) and (args.lats_max or args.lats_min):
         lats_invalid()
 
+    # Set default plot boundaries if none are provided.
     if args.south:
         args.lats_max = -50 if args.lats_max is None else args.lats_max
         args.lats_min = -90 if args.lats_min is None else args.lats_min
