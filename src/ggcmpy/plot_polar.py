@@ -43,11 +43,11 @@ grids_theta_deg = (
 
 
 class InvalidLatitudesException(Exception):
-    """Handle latitude exceptions."""
+    """Exception is raised when invalid latitude boundaries are provided."""
 
 
-# Exit the program if given invalid latitudes.
 def lats_invalid() -> None:
+    """Print an error message and exit the program if latitude arguments are invalid."""
     msg = (
         "Invalid latitudes! Please enter one of the following:\n"
         "1) '-n' or '-s' as an option, OR\n"
