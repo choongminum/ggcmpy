@@ -278,6 +278,7 @@ def main() -> None:
                 highlight_station=args.highlight,
                 timestamp=args.timestamp,
             )
+            plt.show()
     except InvalidLatitudesException:
         lats_invalid()
 
