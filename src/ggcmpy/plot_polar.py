@@ -106,29 +106,34 @@ def draw_coastlines_polar(ax: Any, lats_min: int, time: np.datetime64 | None) ->
 
 def draw_magnetometers(
     ax: Any,
-    time: np.datetime64,
+    lats_min: int,
+    time: np.datetime64 | None,
     highlight: str | None = None,
     network: str = "AL",
 ) -> None:
+    """Plot ground magnetometer stations in SM coordinates."""
     from .openggcm import (
         CANOPUS_MAGNETOMETERS,
         MAGNETOMETERS,
         _cotr_geo_sm_lat_lon,
     )
 
+    if time is None:
+        warnings.warn(
+            "Magnetometers require a time variable for SM transformation. Skipping.",
+            stacklevel=2,
+        )
+        return
+
     stations_dict = CANOPUS_MAGNETOMETERS if network.upper() == "CL" else MAGNETOMETERS
 
     for name, station in stations_dict.items():
-        # Transform geographic coordinates to Solar Magnetic (SM) for plotting.
-        mlat, mlon = _cotr_geo_sm_lat_lon(
-            time,
-            float(station["lat"]),  # type: ignore[arg-type]
-            float(station["lon"]),  # type: ignore[arg-type]
-        )
+        stn_lat = float(station["lat"])  # type: ignore[arg-type]
+        stn_lon = float(station["lon"])  # type: ignore[arg-type]
 
-        # Use the transformed mlon and mlat.
-        theta = np.deg2rad(mlon)
-        r = 90 - mlat
+        plot_lat, plot_lon = _cotr_geo_sm_lat_lon(time, stn_lat, stn_lon)
+        theta = np.deg2rad(plot_lon)
+        r = 90.0 - plot_lat if lats_min >= 0 else 90.0 + plot_lat
 
         if name == highlight:
             ax.scatter(theta, r, s=40, color="green", zorder=6)
