@@ -57,26 +57,22 @@ def lats_invalid() -> None:
     sys.exit(msg)
 
 
-# Return a tuple of the plot parameters.
 def get_plot_params(
-    lats_max: int, lats_min: int, spacing: int, da: xr.DataArray
-) -> tuple[range, tuple[str, ...], xr.DataArray]:
-    if 0 <= lats_min < lats_max <= 90:
-        range_r = range(int(90 - lats_max), int(lats_max - lats_min), spacing)
-        grids_r = tuple(
-            f"{lat}" for lat in range(int(lats_max), int(lats_min), -spacing)
-        )
-        coord_ns = da.ggcm.coords["colats"]
-    elif -90 <= lats_min < lats_max <= 0:
-        range_r = range(int(lats_min), int(lats_max), spacing)
-        grids_r = tuple(
-            f"{lat}" for lat in range(int(lats_min), int(lats_max), spacing)
-        )
-        coord_ns = da.coords["lats"]
+    lats_max: int, lats_min: int, spacing: int
+) -> tuple[range, tuple[str, ...]]:
+    """Generate the radial limits and labels for the polar plot grid."""
+    if lats_min >= 0:
+        # Northern hemisphere
+        range_r = range(int(90 - lats_max), int(90 - lats_min), spacing)
+        grids_r = tuple(f"{90 - r}" for r in range_r)
+    elif lats_min < 0:
+        # Southern hemisphere
+        range_r = range(int(90 + lats_min), int(90 + lats_max), spacing)
+        grids_r = tuple(f"{r - 90}" for r in range_r)
     else:
         raise InvalidLatitudesException
 
-    return range_r, grids_r, coord_ns
+    return range_r, grids_r
 
 
 def draw_coastlines_polar(ax: Any, lats_min: int, time: np.datetime64) -> None:
