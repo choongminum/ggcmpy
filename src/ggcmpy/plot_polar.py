@@ -165,51 +165,102 @@ def plot_from_dataarray(
     network: str = "AL",
     **kwargs: Any,
 ) -> None:
+    """Core function to format and plot 2D polar data in SM coordinates"""
+
+    # Safely extract formatting metadata from the Xarray dataset.
+    da_name = str(da.name) if da.name is not None else "Variable"
+    long_name = da.attrs.get("long_name", da_name)
+    units = da.attrs.get("units", "")
+    plot_title = f"{long_name} [{units}]" if units else long_name
+
+    # Extract single temporal value for SM transformations (coastlines/stations).
+    time_val: np.datetime64 | None = None
+    if "time" in da.coords:
+        time_val = np.datetime64(np.atleast_1d(da.coords["time"].values)[0])
+
+    # Guarantee the DataArray is in SM coordinates before slicing.
+    from .coord_transform import transform_geo_to_sm
+
+    da = transform_geo_to_sm(da)
+
+    # Determine the coordinate names.
+    lat_name = "mlat" if "mlat" in da.coords else "lats"
+    lon_name = "mlon" if "mlon" in da.coords else "longs"
+
+    # Ensure the latitude slice direction is valid.
+    lat_vals = da.coords[lat_name].values
+    is_descending = lat_vals[0] > lat_vals[-1]
+
+    if is_descending:
+        da_sliced = da.sel({lat_name: slice(lats_max, lats_min)})
+    else:
+        da_sliced = da.sel({lat_name: slice(lats_min, lats_max)})
+
+    # Ensure consistent matrix orientation: (Latitude, Longitude).
+    plot_data = da_sliced.squeeze().transpose(lat_name, lon_name)
+    z_vals = plot_data.values
+    lat_vals = plot_data.coords[lat_name].values
+    lon_vals = plot_data.coords[lon_name].values
+
+    # Prepare the grid.
+    r_1d = 90.0 - lat_vals if lats_min >= 0 else 90.0 + lat_vals
+    theta_1d = np.deg2rad(lon_vals)
+    theta_grid, r_grid = np.meshgrid(theta_1d, r_1d)
+    plot_z = z_vals
+
+    # Initialize the plot.
     fig, ax = plt.subplots(
         subplot_kw={"projection": "polar", "theta_offset": np.pi / 2}
     )
 
-    plot_title = f"{da.attrs['long_name']} [{da.attrs['units']}]"
-    da_sliced = da.sel(lats=slice(lats_max, lats_min))
-
     if levels is None:
-        abs_max = np.abs(da_sliced.values).max()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            abs_max = np.nanmax(np.abs(plot_z))
+
+        if np.isnan(abs_max) or abs_max == 0:
+            abs_max = 1.0
+
         levels = np.linspace(-abs_max, abs_max, 51)
 
     if coastlines:
-        time_val = da_sliced.coords["time"].values
         draw_coastlines_polar(ax, lats_min, time=time_val)
 
     if stations:
-        time_val = da_sliced.coords["time"].values
         draw_magnetometers(
-            ax, time=time_val, highlight=highlight_station, network=network
+            ax,
+            lats_min=lats_min,
+            time=time_val,
+            highlight=highlight_station,
+            network=network,
         )
 
-    if timestamp:
-        current_time = da_sliced.time.values
-        ax.text(np.pi, 48, current_time, ha="center", va="center", fontsize=10)
+    # Hardcode the timestamp printing.
+    if timestamp and time_val is not None:
+        ax.text(np.pi, 48, str(time_val), ha="center", va="center", fontsize=10)
 
-    range_theta = range(0, 360, 30)
-    range_r, grids_r, coord_ns = get_plot_params(lats_max, lats_min, spacing, da_sliced)
-
-    plt.thetagrids(range_theta, grids_theta_mlt if mlt else grids_theta_deg)
+    # Apply axis labels and grids.
+    range_r, grids_r = get_plot_params(lats_max, lats_min, spacing)
+    plt.thetagrids(np.arange(0, 360, 30), grids_theta_mlt if mlt else grids_theta_deg)
     plt.rgrids(range_r, grids_r)
 
     ax.set_title(plot_title, pad=8, fontsize=13)
     ax.set_axisbelow(False)
 
-    lon = da_sliced.coords["longs"]
-
+    # Plot the final transformed data.
     mesh = ax.contourf(
-        np.deg2rad(lon),
-        coord_ns,
-        da_sliced.T,
+        theta_grid,
+        r_grid,
+        plot_z,
         cmap=cmap,
         levels=levels,
         extend=extend,
         **kwargs,
     )
+
+    plot_rmax = 90 - lats_min if lats_min >= 0 else 90 + lats_max
+    ax.set_rmax(plot_rmax)
+    ax.set_ylim(0, plot_rmax)
 
     fig.colorbar(mesh, pad=0.08, shrink=0.85)
 
